@@ -1,0 +1,12 @@
+[Fm-index API]
+- build: build index from given text, must provide a mapper that maps
+alphabets to their lexicalgraphic rank. Inheritate build method from builder.
+- save: save index arxiv to one or multiple file
+- load: load index arxiv from one or multiple file
+- locate: locate given pattern in the index
+- count: count the number of occurences for a given pattern in the index
+
+[Index build method implemnetations]
+- fm-index from SAIS
+- blockwise-bwt
+- BWT-IS
