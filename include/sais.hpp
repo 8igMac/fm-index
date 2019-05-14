@@ -1,184 +1,111 @@
 #pragma once
-#include <cstdlib>
-#include <iterator>
+#include <algorithm>
+#include <memory>
+#include <cassert>
 
-template <class StringType, class SuffixArrayIteratorType>
-class SAIS
+struct SAIS
 {
-    using IndexType  = typename std::iterator_traits<SuffixArrayIteratorType>::value_type;
-    using BucketType = IndexType*;
+    SAIS() = default;
 
-    StringType&     s;
-    SuffixArrayIteratorType SA;
-    IndexType       n, K;
-    int             level;
-    BucketType      C, B;
-    unsigned char*  t;
-
-    const IndexType EMPTY = -1;
-    unsigned char mask[8] = {0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01};
-#define tget(i) ( (t[(i)>>3] & mask[(i)&7]) ? 1 : 0 )
-#define tset(i, b) t[(i)>>3] = (b) ? (mask[(i)&7] | t[(i)>>3]) : ((~mask[(i)&7]) & t[(i)>>3])
-#define isLMS(i) ((i)>0 && tget(i) && !tget(i-1))
-
-    void getCounts()
+    template<class SEQ, class SA>
+    void operator()(const SEQ& seq, SA& sa, uint32_t k)
     {
-        IndexType i;
-        for (i = 0; i < K; ++i) { C[i] = 0; } // clear all buckets
-        for (i = 0; i < n; ++i) { ++C[s[i]]; } // compute the size of each bucket
+        return call_impl(seq.begin(), sa.begin(), seq.size(), k);
     }
 
-    // compute the head or end of each bucket
-    void getBuckets(bool end)
+  private:
+    /// @brief Find the suffix array of seq[0..n-1] in {0..k-1}^n
+    /// require s[n-1]=0 (the sentinel!), n>=2
+    template<class SEQ_ITR, class SA_ITR>
+    void call_impl(const SEQ_ITR seq, SA_ITR sa, std::size_t n, uint32_t k)
     {
-        IndexType i, sum = 0;
-        if(end) { for (i = 0; i < K; ++i) { sum += C[i]; B[i] = sum - 1; } }
-        else { for (i = 0; i < K; ++i) { sum += C[i]; B[i] = sum - C[i]; } }
-    }
+        // std::vector<std::size_t> ans_sa{72, 60, 61, 62, 63, 30, 1, 64, 31, 2, 57, 43, 14, 19, 46, 65, 32, 3, 58, 17, 44, 15, 20, 47, 66, 29, 56, 42, 13, 41, 12, 40, 11, 39, 10, 38, 9, 37, 8, 28, 55, 36, 7, 27, 54, 35, 6, 26, 53, 34, 5, 25, 52, 33, 4, 71, 59, 0, 18, 45, 16, 24, 51, 70, 23, 50, 69, 22, 49, 68, 21, 48, 67};
+        // std::transform(ans_sa.begin(), ans_sa.end(), sa, 
+        //     [](std::size_t value){ return value; });
 
-    // compute SAl
-    void induceSAl(const unsigned char* t, int level)
-    {
-        IndexType i, j;
-        getBuckets(false); // find heads of buckets
-        if (level == 0) 
-            B[0]++;
-        for (i = 0; i < n; i++)
-            if (SA[i] != (IndexType)-1)
-            {
-                j = SA[i] - 1;
-                if (j != (IndexType)-1 && !tget(j)) 
-                    SA[B[s[j]]++] = j;
-            }
-    }
+        std::size_t i, j;
+        std::size_t c0, c1;
+        assert((n >= 2) && (k >= 1));
 
-    // compute SAs
-    void induceSAs(const unsigned char* t)
-    {
-        IndexType i, j;
-        getBuckets(true); // find ends of buckets
-        for (i = n-1; i != (IndexType)-1; i--)
-            if (SA[i] != (IndexType)-1)
-            {
-                j = SA[i] - 1;
-                if (j != (IndexType)-1 && tget(j)) 
-                    SA[B[s[j]]--] = j;
-            }
-    }
-
-    // find the suffix array SA of s[0..n-1] in {0..K}^n;
-    // require s[n-1]=0 (the virtual sentinel!), n>=2;
-    // use a space of at most 6.25n+(1) for a constant alphabet;
-    // level starts from 0.
-public:
-    explicit SAIS(StringType& s, SuffixArrayIteratorType SA, IndexType n, IndexType K, int level = 0): s(s), SA(SA), n(n), K(K), level(level)
-    {
-        IndexType i, j;
-        t = new unsigned char[n/8 + 1]; // LS-type array in bits
-
+        // to free the managed object: ptr.reset();
+        auto count = std::make_unique<std::size_t[]>(k);
+        auto bkt = std::make_unique<std::size_t[]>(k);
+        
         // stage 1: reduce the problem by at least 1/2
-
-        // Classify the type of each character
-        tset(n-2, 0);
-        tset(n-1, 1); // the sentinel must be in s1, important!!!
-        for (i = n-3; i != (IndexType)-1; i--) 
-            tset(i, (s[i] < s[i+1] || (s[i] == s[i+1] && tget(i+1) == 1)) ? 1 : 0);
-
-        C = new IndexType[K];
-        B = new IndexType[K];
-
-        // sort all the S-substrings
-        getCounts();
-        getBuckets(true); // find ends of buckets
-        for (i = 0; i < n; i++) SA[i] = EMPTY;
-        for (i = n-2; i != (IndexType)-1; i--)
-            if (isLMS(i)) 
-                SA[B[s[i]]--] = i;
-        SA[0] = n-1; // set the single sentinel LMS-substring
-
-        induceSAl(t, level);
-        induceSAs(t);
-
-        delete[](C);
-        delete[](B);
-
-        // compact all the sorted substrings into the first n1 items of s
-        // 2*n1 must be not larger than n (proveable)
-        IndexType n1 = 0;
+        // sort all the LMS-substrings 
+        get_counts(seq, count, n, k);
+        get_buckets(count, bkt, k, true); // find end of bkt
         for (i = 0; i < n; i++)
-            if (isLMS(SA[i]))
-                SA[n1++] = SA[i];
+            sa[i] = 0;
+        // place all the LMS into bucket in SA
+        // debug
+        for (i = 0; i < k; i++)
+            std::cerr << bkt[i] << " ";
+        std::cerr << std::endl;
+        for (i = 0; i < n; i++)
+            std::cerr << sa[i] << " ";
+        std::cerr << std::endl;
 
-        // Init the name array buffer
-        for (i = n1; i < n; i++) SA[i] = EMPTY;
-        // find the lexicographic names of all substrings
-        IndexType name = 0, prev = -1;
-        for (i = 0; i < n1; i++)
+        std::size_t num_lms = 1;
+        sa[0] = n-1;
+        auto b = sa + --bkt[0]; 
+        i = n - 1;
+        j = n;
+        c0 = seq[n-1];
+        // find next S-type
+        do { c1 = c0; } 
+        while ((--i < n) && ((c0 = seq[i]) >= c1));
+        for (; i < n;)
         {
-            IndexType pos = SA[i];
-            bool diff = false;
-            for (IndexType d = 0; d < n; d++)
-                if (prev == -1 || pos+d == n-1 || prev+d == n-1 || s[pos+d] != s[prev+d] || tget(pos+d) != tget(prev+d))
-                { diff = true; break; }
-                else
-                if (d > 0 && (isLMS(pos+d) || isLMS(prev+d)))
-                    break;
-
-            if (diff)
-            { name++; prev = pos; }
-            pos = pos / 2;
-            SA[n1 + pos] = name - 1;
+            // find next L-type
+            do { c1 = c0; } 
+            while ((--i < n) && ((c0 = seq[i]) <= c1));
+            if (i < n)
+            {
+                std::cerr << j << " ";//debug
+                *b = j; b = sa + --bkt[c1]; j = i; num_lms++;
+                // find next S-type
+                do { c1 = c0; } 
+                while ((--i < n) && ((c0 = seq[i]) >= c1));
+            }
         }
-        for (i = n-1, j = n-1; i >= n1; i--)
-            if (SA[i] != (IndexType)-1) 
-                SA[j--] = SA[i];
+        std::cerr << std::endl; //debug
+        // debug
+        for (i = 0; i < n; i++)
+            std::cerr << sa[i] << " ";
+        std::cerr << std::endl;
+    }
 
-        // s1 is done now
+    template<class SEQ_ITR>
+    auto get_counts(
+        const SEQ_ITR seq
+      , std::unique_ptr<std::size_t[]>& count
+      , std::size_t n
+      , uint32_t k
+    )
+    {
+        std::size_t i;
+        for (i = 0; i < k; i++)
+            count[i] = 0;
+        for (i = 0; i < n; i++)
+            count[seq[i]]++;
+    }
 
-        SuffixArrayIteratorType SA1 = SA, s1 = SA + n - n1;
-
-        // stage 2: solve the reduced problem
-
-        // recurse if names are not yet unique
-        if (name < n1)
+    auto get_buckets(
+        std::unique_ptr<std::size_t[]>& count
+      , std::unique_ptr<std::size_t[]>& bkt
+      , uint32_t k
+      , bool end
+    )
+    {
+        std::size_t i, sum = 0;
+        for (i = 0; i < k; i++)
         {
-            SAIS<SuffixArrayIteratorType, SuffixArrayIteratorType>(s1, SA1, n1, name, level+1);
-        }
-        else
-        {   // generate the suffix array of s1 directly
-            for (i = 0; i < n1; i++) SA1[s1[i]] = i;
-        }
-
-        // stage 3: induce the result for the original problem
-
-        C = new IndexType[K];
-        B = new IndexType[K];
-
-        // put all left-most S characters into their buckets
-        getCounts();
-        getBuckets(true); // find ends of buckets
-
-        j = 0;
-        for (i = 1; i < n; i++)
-            if (isLMS(i)) 
-                s1[j++] = i; // get p1
-        for (i = 0; i < n1; i++) SA1[i] = s1[SA1[i]]; // get index in s1
-        for (i = n1; i < n; i++) SA[i] = EMPTY; // init SA[n1..n-1]
-        for (i = n1-1; i != (IndexType)-1; i--)
-        {
-            j = SA[i]; SA[i] = EMPTY;
-            if (level == 0 && i == 0)
-                SA[0] = n-1;
+            sum += count[i];
+            if (end)
+                bkt[i] = sum;
             else
-                SA[B[s[j]]--] = j;
+                bkt[i] = sum - count[i];
         }
-
-        induceSAl(t, level);
-        induceSAs(t);
-
-        delete[](t);
-        delete[](C);
-        delete[](B);
     }
 };
-
