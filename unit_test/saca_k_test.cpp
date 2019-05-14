@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 #include <random>
 #include <chrono>
-#include "sais.hpp"
+#include "saca_k.hpp"
 
-TEST(SAISTest, BasicTest)
+TEST(SACA_KTest, BasicTest)
 {
     std::string seq{"TAAAGGGGCCCCCCAATATAATTTTGGGGCAAAGGGGCCCCCCAATAATTTTGGGGCAATAAAAAAATTTTTA"}; // the extra A denote $
     std::vector<std::size_t> ans_sa{72, 60, 61, 62, 63, 30, 1, 64, 31, 2, 57, 43, 14, 19, 46, 65, 32, 3, 58, 17, 44, 15, 20, 47, 66, 29, 56, 42, 13, 41, 12, 40, 11, 39, 10, 38, 9, 37, 8, 28, 55, 36, 7, 27, 54, 35, 6, 26, 53, 34, 5, 25, 52, 33, 4, 71, 59, 0, 18, 45, 16, 24, 51, 70, 23, 50, 69, 22, 49, 68, 21, 48, 67};
@@ -24,19 +24,19 @@ TEST(SAISTest, BasicTest)
             }
         });
 
-    SAIS sorter;
+    SACA_K sorter;
     std::vector<std::size_t> sa(ans_sa.size());
     sorter(seq, sa, 4);
     EXPECT_EQ(ans_sa, sa);
 }
 
-TEST(SAISTest, PerformanceTest)
+TEST(SACA_KTest, PerformanceTest)
 {
     std::size_t length = 1024*1024;
     std::string seq;
     seq.reserve(length);
     std::vector<std::size_t> sa(length);
-    SAIS sorter;
+    SACA_K sorter;
 
     // generate radom DNA sequence 
     // {'A', 'C', 'G', 'T'} => {0, 1, 2, 3};

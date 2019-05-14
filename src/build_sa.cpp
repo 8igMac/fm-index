@@ -4,6 +4,7 @@
 #include <chrono>
 #include <random>
 #include "sais.hpp"
+using Sorter = SAIS;
 
 int main(int argc, char** argv)
 {
@@ -53,13 +54,13 @@ int main(int argc, char** argv)
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = end - start;
     std::cerr << "seq size: " << seq.size() << ", "
-              << "read time: " << elapsed.count() << "s\n";
+              << "file read time: " << elapsed.count() << "s\n";
 
     // Construct suffix array 
     std::vector<std::size_t> sa(seq.size());
-    SAIS sais;
+    Sorter sorter;
     start = std::chrono::high_resolution_clock::now();
-    sais(seq, sa, 4); 
+    sorter(seq, sa, 4); 
     end = std::chrono::high_resolution_clock::now();
     elapsed = end - start;
     std::cerr << "Suffix array construction time: " 
