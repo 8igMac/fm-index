@@ -56,7 +56,7 @@ int main(int argc, char** argv)
               << "file read time: " << elapsed.count() << "s\n";
 
     // Construct suffix array 
-    std::vector<std::size_t> sa(seq.size());
+    std::vector<uint32_t> sa(seq.size());
     SACA_K<decltype(seq), decltype(sa)> sa_builder;
     start = std::chrono::high_resolution_clock::now();
     sa_builder.build(seq, sa, 4);
