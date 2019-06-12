@@ -23,7 +23,7 @@ class SACA_K
           , seq.size());
     }
 
-  private:
+  // private:
     /// @brief Find the suffix array of seq[0..n-1] in {0..k-1}^n
     /// require seq[n-1]=0 (the sentinel!), n>=2
     template<class SEQ_ITR>
@@ -237,7 +237,8 @@ class SACA_K
 
         // get suffix array of LMS
         std::for_each(sa, sa+n1
-          , [&s1](auto& sa_value){ sa_value = s1[sa_value]; });
+          , [&s1](auto& sa_value){ 
+          sa_value = s1[sa_value]; });
 
         // init sa[n1..n-1]
         if (level)
@@ -372,11 +373,15 @@ class SACA_K
                     //   neighbor bucket.
                     // shift-right the items in the
                     //   right neighbor bucket.
-                    Index j;
-                    for (j = 1
-                      ; static_cast<SignedIndex>(sa[c+i]) >= 0
-                      ; i++); // find counter
-                    std::move_backward(sa+c, sa+c+j, sa+c+j+1);
+                    Index cnt_pos;
+                    // find counter
+                    for (cnt_pos = c+1
+                      ; static_cast<SignedIndex>(sa[cnt_pos]) >= 0
+                      ; cnt_pos++); 
+                    std::move_backward(
+                        sa+c
+                      , sa+cnt_pos
+                      , sa+cnt_pos+1);
                     sa[c] = EMPTY;
                 }
 
@@ -547,8 +552,8 @@ class SACA_K
                   ; cnt_pos++); 
                 std::move_backward(
                     sa+c
-                  , sa+c+cnt_pos
-                  , sa+c+cnt_pos+1);
+                  , sa+cnt_pos
+                  , sa+cnt_pos+1);
                 if (cnt_pos > i)
                     step = 0;
                 d = EMPTY;
