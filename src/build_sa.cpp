@@ -3,8 +3,7 @@
 #include <vector>
 #include <chrono>
 #include <random>
-#include "sais.hpp"
-using Sorter = SAIS;
+#include "saca_k.hpp"
 
 int main(int argc, char** argv)
 {
@@ -58,9 +57,9 @@ int main(int argc, char** argv)
 
     // Construct suffix array 
     std::vector<std::size_t> sa(seq.size());
-    Sorter sorter;
+    SACA_K<decltype(seq), decltype(sa)> sa_builder;
     start = std::chrono::high_resolution_clock::now();
-    sorter(seq, sa, 4); 
+    sa_builder.build(seq, sa, 4);
     end = std::chrono::high_resolution_clock::now();
     elapsed = end - start;
     std::cerr << "Suffix array construction time: " 
