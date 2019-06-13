@@ -1,12 +1,14 @@
 #include <gtest/gtest.h>
 #include <random>
+#include <fstream>
 #include <chrono>
 #include <algorithm>
 #include "saca_k.hpp"
 
 template<class SEQ, class SA>
-bool sa_is_correct(const SEQ& seq, const SA& sa, int n, int k)
+bool sa_is_correct(const SEQ& seq, const SA& sa, int k)
 {
+    int n = sa.size();
     // check elem in sa is in range [0, n)
     for (const auto& elem : sa)
         if (elem < 0 || elem >= n)
@@ -48,7 +50,189 @@ bool sa_is_correct(const SEQ& seq, const SA& sa, int n, int k)
     return true;
 }
 
-TEST(SACA_KTest, Random)
+TEST(SACA_K, GetBuckets)
+{
+    SACA_K<std::string, std::vector<uint32_t>> sa_builder;
+    std::vector<uint32_t> count {1, 2, 3, 4};
+    decltype(count) bkt(count.size());
+    decltype(count) ans_bkt_head {0, 1, 3, 6};
+    decltype(count) ans_bkt_tail {0, 2, 5, 9};
+
+    bool get_tail = false;
+    sa_builder.get_buckets(count, bkt, get_tail);
+    EXPECT_EQ(bkt, ans_bkt_head);
+
+    std::fill(bkt.begin(), bkt.end(), 0);
+    get_tail = true;
+    sa_builder.get_buckets(count, bkt, get_tail);
+    EXPECT_EQ(bkt, ans_bkt_tail);
+}
+
+TEST(SACA_K, GetLmsLen)
+{
+    // LMS can only be either $(sentinal) or can be expressed
+    // as regex S+L+S
+    std::vector<int> seq {1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0};
+    SACA_K<decltype(seq), std::vector<uint32_t>> sa_builder;
+    // $
+    EXPECT_EQ(1, sa_builder.get_lms_len(
+        seq.begin(), seq.size(), seq.size()-1));
+    // SLS
+    EXPECT_EQ(3, sa_builder.get_lms_len(
+        seq.begin(), seq.size(), 1));
+    // SSLS
+    EXPECT_EQ(4, sa_builder.get_lms_len(
+        seq.begin(), seq.size(), 3));
+    // SLLS
+    EXPECT_EQ(4, sa_builder.get_lms_len(
+        seq.begin(), seq.size(), 6));
+    // SSLLS
+    EXPECT_EQ(5, sa_builder.get_lms_len(
+        seq.begin(), seq.size(), 9));
+}
+
+TEST(SACA_K, GetSaOfLms)
+{
+    std::vector<int> seq {1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0};
+    std::vector<uint32_t> sa(seq.size());
+    SACA_K<decltype(seq), decltype(sa)> sa_builder;
+    decltype(sa) sa_of_lms {13, 3, 9, 1, 6};
+    uint32_t EMPTY { ((uint32_t)1) << (sizeof(uint32_t)*8-1) };
+    int num_lms = sa_of_lms.size();
+
+    // level0
+    for (auto i = num_lms; i < seq.size(); i++)
+        sa_of_lms.push_back(0);
+    // assign sa1
+    sa[0] = 4;
+    sa[1] = 1;
+    sa[2] = 3;
+    sa[3] = 0;
+    sa[4] = 2;
+    sa_builder.get_sa_of_lms(
+        seq.begin()
+      , sa.begin()
+      , sa.begin() + seq.size() - num_lms
+      , seq.size()
+      , num_lms
+      , 0);
+    EXPECT_EQ(sa, sa_of_lms);
+
+    // level1
+    std::fill(sa_of_lms.begin() + num_lms, sa_of_lms.end(), EMPTY);
+    sa[0] = 4;
+    sa[1] = 1;
+    sa[2] = 3;
+    sa[3] = 0;
+    sa[4] = 2;
+    sa_builder.get_sa_of_lms(
+        seq.begin()
+      , sa.begin()
+      , sa.begin() + seq.size() - num_lms 
+      , seq.size()
+      , num_lms
+      , 1);
+    EXPECT_EQ(sa, sa_of_lms);
+}
+
+// TEST(SACA_K, InduceSAL0)
+// {
+//     // +induce_sal0(const SEQ_ITR seq,SaItr sa,std::vector<Index> & bkt,std::vector<Index> & count,Index n,bool suffix)
+//
+// }
+//
+// TEST(SACA_K, InduceSAS0)
+// {
+//     // +induce_sas0(const SEQ_ITR seq,SaItr sa,std::vector<Index> & bkt,std::vector<Index> & count,Index n,bool suffix)
+//
+// }
+//
+// TEST(SACA_K, InduceSAL1)
+// {
+//     // +induce_sal1(const SEQ_ITR seq,SaItr sa,Index n,bool suffix)
+//
+// }
+//
+// TEST(SACA_K, InduceSAS1)
+// {
+//     // +induce_sas1(const SEQ_ITR seq,SaItr sa,Index n,bool suffix)
+//
+// }
+
+// TEST(SACA_K, NameSubstr)
+// {
+//     // +name_substr(const SEQ_ITR seq,SaItr sa,SaItr s1,Index n,Index m,Index n1,Index level)
+//
+// }
+
+// TEST(SACA_K, PutLmsSubstr0)
+// {
+//     // +put_lms_substr0(const SEQ_ITR seq,SaItr sa,std::vector<Index> & bkt,std::vector<Index> & count,Index n)
+//
+// }
+//
+// TEST(SACA_K, PutLmsSubstr1)
+// {
+//     // +put_lms_substr1(const SEQ_ITR seq,SaItr sa,Index n)
+//
+// }
+//
+// TEST(SACA_K, PutSuffix0)
+// {
+//     // +put_suffix0(const SEQ_ITR seq,SaItr sa,std::vector<Index> & bkt,std::vector<Index> & count,Index n,Index n1)
+//
+// }
+//
+// TEST(SACA_K, PutSuffix1)
+// {
+//     // +put_suffix1(const SEQ_ITR seq,SaItr sa,Index n1)
+//
+// }
+
+TEST(SACA_K, IntegrationOneLevel)
+{
+    std::string seq {"bananaa"}; // include $
+    std::vector<uint32_t> sa(seq.size());
+
+    std::transform(seq.begin(), seq.end(), seq.begin(),
+        [](char base) 
+        {
+            switch (base)
+            {
+                case 'a': return 0;
+                case 'b': return 1;
+                case 'n': return 2;
+                default: 
+                    throw std::runtime_error(
+                        "unknown character, ascii code: " 
+                      + std::to_string(base));
+            }
+        });
+
+    SACA_K<decltype(seq), decltype(sa)> sa_builder;
+    sa_builder.build(seq, sa, 3);
+    EXPECT_TRUE(sa_is_correct(seq, sa, 3));
+}
+
+TEST(SACA_K, IntegrationThreeLevel)
+{
+    // level 0, size 5000
+    // level 1, size 1425
+    // level 2, size 467
+
+    std::ifstream ifs("../unit_test/data/three-level-seq.txt");
+    std::string seq;
+    std::getline(ifs, seq);
+    for (auto& elem : seq)
+        elem -= 48;
+
+    std::vector<uint32_t> sa(seq.size());
+    SACA_K<decltype(seq), decltype(sa)> sa_builder;
+    sa_builder.build(seq, sa, 4);
+    EXPECT_TRUE(sa_is_correct(seq, sa, 4));
+}
+
+TEST(SACA_K, EasyTwoLevel0)
 {
     std::string seq {"aatcgaaggtcgtaaggacacggttgagcgttcagcgtta"}; // include $
     std::vector<uint32_t> sa(seq.size());
@@ -71,37 +255,10 @@ TEST(SACA_KTest, Random)
 
     SACA_K<decltype(seq), decltype(sa)> sa_builder;
     sa_builder.build(seq, sa, 4);
-    EXPECT_TRUE(sa_is_correct(seq, sa, sa.size(), 4));
+    EXPECT_TRUE(sa_is_correct(seq, sa, 4));
 }
 
-// The test case is designed to reach no recursion
-TEST(SACA_KTest, RecursionLevel0)
-{
-    std::string seq {"bananaa"}; // include $
-    std::vector<uint32_t> sa(seq.size());
-
-    std::transform(seq.begin(), seq.end(), seq.begin(),
-        [](char base) 
-        {
-            switch (base)
-            {
-                case 'a': return 0;
-                case 'b': return 1;
-                case 'n': return 2;
-                default: 
-                    throw std::runtime_error(
-                        "unknown character, ascii code: " 
-                      + std::to_string(base));
-            }
-        });
-
-    SACA_K<decltype(seq), decltype(sa)> sa_builder;
-    sa_builder.build(seq, sa, 3);
-    EXPECT_TRUE(sa_is_correct(seq, sa, sa.size(), 3));
-}
-
-// The test case is designed to reach 1 recursion
-TEST(SACA_KTest, RecursionLevel1)
+TEST(SACA_K, EasyTwoLevel1)
 {
     std::string seq {"banaananana"}; // include $
     std::vector<uint32_t> sa(seq.size());
@@ -123,11 +280,10 @@ TEST(SACA_KTest, RecursionLevel1)
 
     SACA_K<decltype(seq), decltype(sa)> sa_builder;
     sa_builder.build(seq, sa, 3);
-    EXPECT_TRUE(sa_is_correct(seq, sa, sa.size(), 3));
+    EXPECT_TRUE(sa_is_correct(seq, sa, 3));
 }
 
-// A more complecate and complete test case
-TEST(SACA_KTest, BasicTest)
+TEST(SACA_K, EasyTwoLevel2)
 {
     std::string seq{"TAAAGGGGCCCCCCAATATAATTTTGGGGCAAAGGGGCCCCCCAATAATTTTGGGGCAATAAAAAAATTTTTA"}; // the extra A denote $
     std::vector<uint32_t> sa(seq.size());
@@ -151,10 +307,10 @@ TEST(SACA_KTest, BasicTest)
 
     SACA_K<decltype(seq), decltype(sa)> sa_builder;
     sa_builder.build(seq, sa, alphabet_size);
-    EXPECT_TRUE(sa_is_correct(seq, sa, sa.size(), alphabet_size));
+    EXPECT_TRUE(sa_is_correct(seq, sa, alphabet_size));
 }
 
-TEST(SACA_KTest, PerformanceTest1MB)
+TEST(SACA_K, PerformanceTest1MB)
 {
     uint32_t length = 1024*1024;
     std::vector<char> seq(length);
@@ -177,6 +333,5 @@ TEST(SACA_KTest, PerformanceTest1MB)
     std::cerr << "Random DNA seq size: 1MB\n"
               << "Suffix array construction time: " 
               << elapsed.count() << "s\n";
-    EXPECT_TRUE(sa_is_correct(seq, sa, sa.size(), 4));
+    EXPECT_TRUE(sa_is_correct(seq, sa, 4));
 }
-

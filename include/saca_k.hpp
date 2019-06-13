@@ -97,7 +97,7 @@ class SACA_K
     }
 
     void get_buckets(
-        std::vector<Index>& count
+        const std::vector<Index>& count
       , std::vector<Index>& bkt
       , bool end
     )
