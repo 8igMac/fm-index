@@ -7,6 +7,8 @@ os:
 addons:
     apt:
         packages:
+            - gcc-6
+            - g++-6
             - cmake
             - libgtest-dev
 script:
