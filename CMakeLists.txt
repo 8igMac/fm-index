@@ -14,7 +14,20 @@ include_directories(include)
 
 # Build 
 if(BUILD_TESTS)
-    add_executable(fm_index_test unit_test/fm_index_test.cpp)
-    target_link_libraries(fm_index_test gtest gtest_main)
-    add_test(fm_index_test fm_index_test)
+    # sais
+    add_executable(sais_test unit_test/sais_test.cpp)
+    target_link_libraries(sais_test gtest gtest_main)
+    add_test(sais_test sais_test)
+
+    # saca-k
+    add_executable(saca_k_test unit_test/saca_k_test.cpp)
+    target_link_libraries(saca_k_test gtest gtest_main)
+    add_test(saca_k_test saca_k_test)
+
+    # # bwt-isfm
+    # add_executable(bwt_isfm_test unit_test/bwt_isfm_test.cpp)
+    # target_link_libraries(bwt_isfm_test gtest gtest_main)
+    # add_test(bwt_isfm_test bwt_isfm_test)
 endif()
+
+add_executable(build_sa src/build_sa.cpp)
