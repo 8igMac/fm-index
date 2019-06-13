@@ -1,0 +1,19 @@
+language: cpp
+
+compiler:
+    - gcc
+os:
+    - linux
+addons:
+    apt:
+        packages:
+            - cmake
+script:
+    - mkdir build
+    - cd build
+    - cmake ..
+    - cmake --build .
+branch:
+    only:
+        - master
+        - dev
