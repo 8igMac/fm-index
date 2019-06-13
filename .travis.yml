@@ -1,22 +1,24 @@
-language: cpp
-
-compiler:
-    - gcc
+dist: trusty
+sudo: required
+language: 
+  - cpp
+compilerj:
+  - gcc
 os:
-    - linux
+  - linux
 addons:
-    apt:
-        packages:
-            - gcc-6
-            - g++-6
-            - cmake
-            - libgtest-dev
+  apt:
+    packages:
+      - gcc-6
+      - g++-6
+      - cmake
+      - libgtest-dev
 script:
-    - mkdir build
-    - cd build
-    - cmake ..
-    - cmake --build .
+  - mkdir build
+  - cd build
+  - cmake ..
+  - cmake --build .
 branch:
-    only:
-        - master
-        - dev
+  only:
+    - master
+    - dev
