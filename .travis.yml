@@ -8,6 +8,7 @@ addons:
     apt:
         packages:
             - cmake
+            - libgtest-dev
 script:
     - mkdir build
     - cd build
