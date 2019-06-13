@@ -1,17 +1,13 @@
-dist: trusty
-sudo: required
+dist: Xenial
 language: 
   - cpp
-compilerj:
+compiler:
   - gcc
 os:
   - linux
 addons:
   apt:
     packages:
-      - gcc-6
-      - g++-6
-      - cmake
       - libgtest-dev
 script:
   - mkdir build
