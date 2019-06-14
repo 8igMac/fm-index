@@ -1,19 +1,23 @@
 dist: Xenial
-language: 
-  - cpp
-compiler:
+language: cpp
+compiler: 
   - gcc
-os:
+os: 
   - linux
 addons:
   apt:
     packages:
       - libgtest-dev
 script:
-  - mkdir build
+  - mkdir -p build
   - cd build
   - cmake ..
   - cmake --build .
+  
+notificatios:
+  email: false
+git: 
+  depth: 5
 branch:
   only:
     - master
