@@ -6,7 +6,7 @@ option(BUILD_TESTS "Build tests" ON)
 # Dependencies
 if(BUILD_TESTS)
     enable_testing()
-    include(GoogleTest)
+    find_package(GTest REQUIRED)
 endif()
 
 # Compiler 
