@@ -159,11 +159,32 @@ TEST(SACA_K, GetSaOfLms)
 //
 // }
 
-// TEST(SACA_K, NameSubstr)
-// {
-//     // +name_substr(const SEQ_ITR seq,SaItr sa,SaItr s1,Index n,Index m,Index n1,Index level)
-//
-// }
+TEST(SACA_K, NameSubstr)
+{
+    std::vector<int> seq {1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0};
+    std::vector<uint32_t> sa(seq.size(), 1);
+    sa[0] = 17;
+    sa[1] = 11;
+    sa[2] = 4;
+    sa[3] = 9;
+    sa[4] = 14;
+    sa[5] = 1;
+    sa[6] = 6;
+    std::vector<uint32_t> ans_s1 {5, 3, 5, 2, 1, 4, 0};
+    auto s1 = sa.end() - ans_s1.size();
+    SACA_K<decltype(seq), decltype(sa)> sa_builder;
+
+    int name_cnt = sa_builder.name_substr(
+        seq.begin()
+      , sa.begin()
+      , s1
+      , seq.size()
+      , seq.size()
+      , ans_s1.size());
+    EXPECT_EQ(name_cnt, 5);
+    for (auto i = 0; i < ans_s1.size(); i++)
+        EXPECT_EQ(s1[i], ans_s1[i]);
+}
 
 // TEST(SACA_K, PutLmsSubstr0)
 // {

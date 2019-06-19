@@ -70,7 +70,7 @@ class SACA_K
 
         auto sa1 = sa; // sa1: the first n1 elements in sa
         auto s1 = sa + m - n1; // s1: the last n1 element in sa
-        Index name_count = name_substr(seq, sa, s1, n, m, n1, level);
+        Index name_count = name_substr(seq, sa, s1, n, m, n1);
 
         // stage 2: solve the reduced problem
         // recurse if names are not yet unique
@@ -152,7 +152,6 @@ class SACA_K
       , Index n
       , Index m
       , Index n1
-      , Index level
     )
     {
         // init name array buffer
@@ -163,18 +162,19 @@ class SACA_K
         Index pre_pos, pre_len = 0;
         for (auto i = 0; i < n1; i++)
         {
-            auto diff = true;
+            auto diff = false;
             Index pos = sa[i];
             Index len = get_lms_len(seq, n, pos);
-            if (len == pre_len && (pre_pos + pre_len) < n)
-            {
-                Index j;
-                for (j = 0
-                  ; (j < len) && (seq[pos+j] == seq[pre_pos+j])
-                  ; j++);
-                if (j == len)
-                    diff = false;
-            }
+            if (len != pre_len)
+                diff = true;
+            else
+                for (auto d = 0; d < len; d++)
+                    if (pos+d == n-1 || pre_pos+d == n-1 || 
+                        (seq[pos+d] != seq[pre_pos+d]))
+                    {
+                        diff = true;
+                        break;
+                    }
 
             if (diff)
             {
