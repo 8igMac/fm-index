@@ -1,0 +1,31 @@
+dist: xenial
+language: cpp
+
+git:
+  submodule: true
+
+os: linux
+compiler: 'g++-8'
+addons:
+  apt:
+    source: ['ubuntu-toolchain-r-test']
+    package: ['g++-8']
+
+before_script:
+  - export CC="gcc-8" CXX="g++-8"
+  - $CXX --version
+  - cmake --version 
+
+script:
+  - mkdir -p build 
+  - cd build
+  - cmake .. -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release
+  - ctest
+
+branches:
+  only:
+    - master
+    - dev
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
