@@ -1,19 +1,19 @@
 # Fm-index
 [![Build Status](https://travis-ci.org/8igMac/fm-index.svg?branch=master)](https://travis-ci.org/8igMac/fm-index)
 [![codecov](https://codecov.io/gh/8igMac/fm-index/branch/master/graph/badge.svg)](https://codecov.io/gh/8igMac/fm-index)
+
 Index for fast query substring in large text.
 
 ## Dependencies
-- gcc (c++11)
-- cmake
-- gtest
-- Boost
+- C++ 14
+- cmake 3.12
 
-## How to build
-
-## How to run
+## Build and run
+- `mkdir -p build`
+- `cmake .. -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON`
+- `cmake --build .`
+- `ctest`
 
 ## Reference
-- blockwise-bwt: [Kärkkäinen J., Fast BWT in small space by blockwise suffix sorting, 2007](https://www.sciencedirect.com/science/article/pii/S0304397507005245)
-- SAIS: [Nong G., et al. Two efficient algorithms for linear time suffix array construction, 2011](https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=5582081&tag=1)
-- BWT-IS:[D. Okanohara and K. Sadakane, A linear-time Burrows-Wheeler transform using induced sorting, 2009](https://link.springer.com/chapter/10.1007/978-3-642-03784-9_9)
+- SACA-K: [Nong G. Practical linear-time O(1)-workspace suffix sorting for constant alphabets](https://dl.acm.org/citation.cfm?id=2493180)
+- BWT-ISFM: [Elena Y. Practical Space-efficient Linear Time Construction of FM-index for Large Genomes](https://www.searchdl.org/Resources/Public/Conf/2018/BICOB/1034.pdf)
