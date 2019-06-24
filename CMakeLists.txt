@@ -5,6 +5,7 @@ project(${PROJECT_NAME})
 
 # Compiler setup
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 --coverage")
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
