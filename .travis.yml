@@ -1,24 +1,34 @@
-dist: Xenial
+dist: xenial
 language: cpp
-compiler: 
-  - gcc
-os: 
-  - linux
+
+git:
+  submodule: true
+
+os: linux
+compiler: 'g++-8'
 addons:
   apt:
-    packages:
-      - libgtest-dev
+    source: ['ubuntu-toolchain-r-test']
+    package: ['g++-8']
+
+before_script:
+  - export CC="gcc-8" CXX="g++-8"
+  - $CXX --version
+  - cmake --version 
+
 script:
-  - mkdir -p build
+  - mkdir -p build 
   - cd build
-  - cmake ..
-  - cmake --build .
-  
-notificatios:
-  email: false
-git: 
-  depth: 5
-branch:
+  - cmake .. -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release
+  - ctest
+
+branches:
   only:
     - master
     - dev
+
+notificatios:
+  email: false
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
