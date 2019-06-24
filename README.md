@@ -1,4 +1,6 @@
 # Fm-index
+[![Build Status](https://travis-ci.org/8igMac/fm-index.svg?branch=master)](https://travis-ci.org/8igMac/fm-index)
+[![codecov](https://codecov.io/gh/8igMac/fm-index/branch/master/graph/badge.svg)](https://codecov.io/gh/8igMac/fm-index)
 Index for fast query substring in large text.
 
 ## Dependencies
