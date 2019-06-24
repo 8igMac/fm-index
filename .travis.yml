@@ -5,14 +5,8 @@ git:
   submodule: true
 
 os: linux
-compiler: 'g++-8'
-addons:
-  apt:
-    source: ['ubuntu-toolchain-r-test']
-    packages: ['g++-8']
 
 before_script:
-  - export CC="gcc-8" CXX="g++-8"
   - $CXX --version
   - cmake --version 
 
