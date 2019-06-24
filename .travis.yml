@@ -5,8 +5,17 @@ git:
   submodule: true
 
 os: linux
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-7
+env:
+  - MYCXX="g++-7"
 
 before_script:
+  - export CXX=$MYCXX
   - $CXX --version
   - cmake --version 
 
