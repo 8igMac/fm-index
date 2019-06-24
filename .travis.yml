@@ -23,7 +23,7 @@ before_script:
 script:
   - mkdir -p build 
   - cd build
-  - cmake .. -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release
+  - cmake .. -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug
   - cmake --build .
   - ctest
 
@@ -33,9 +33,4 @@ branches:
     - dev
 
 after_success:
-# Create lcov report
-- lcov --capture --directory . --output-file coverage.info
-- lcov --remove coverage.info '/usr/*' --output-file coverage.info # filter system-files
-- lcov --list coverage.info # debug info
-# Uploading report to CodeCov
-- bash <(curl -s https://codecov.io/bash) -f coverage.info || echo "Codecov did not collect coverage reports"
+- bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
