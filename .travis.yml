@@ -9,7 +9,7 @@ compiler: 'g++-8'
 addons:
   apt:
     source: ['ubuntu-toolchain-r-test']
-    package: ['g++-8']
+    packages: ['g++-8']
 
 before_script:
   - export CC="gcc-8" CXX="g++-8"
