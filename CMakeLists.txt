@@ -21,7 +21,7 @@ if(BUILD_TESTS)
     add_subdirectory(${PROJECT_SOURCE_DIR}/submodules/googletest)
     include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
     pkg_add_test(saca_k_test unit_test/saca_k_test.cpp)
-    # pkg_add_test(bwtisfm_test unit_test/bwt_isfm_test.cpp)
+    pkg_add_test(integration_test unit_test/integration_test.cpp)
 endif()
 
 # Regular source file
