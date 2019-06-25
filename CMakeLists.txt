@@ -26,6 +26,7 @@ endif()
 
 # Regular source file
 add_executable(build_sa src/build_sa.cpp)
+add_executable(build_index src/build_index.cpp)
 
 # Message
 message("Build type: ${CMAKE_BUILD_TYPE}")
