@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 #include <cmath>
 #include <list>
 #include <fstream>
@@ -322,7 +323,7 @@ class FmIndex
         /////////////////////////////////////////
         // Produce LMS SA if name not yet unique
         /////////////////////////////////////////
-        if (name < lms_size)
+        if (lms_size != 1 && name < lms_size)
         {
             SORTER<decltype(lms), decltype(lms_sa)> sa_builder;
             sa_builder.build(lms, lms_sa, name+1);
@@ -397,7 +398,10 @@ class FmIndex
                     auto idx = L[i].front();
                     L[i].pop_front();
                     induce_l(idx, seq, L, LS, head, pos_bit, ofs, true);
+        // TODO: fix double free bug here, with input seq=AAAAAAAAAA
+        // std::cerr << "po\n";//debug
                 }
+        // std::cerr << "hi\n";//debug
                 while (!LMS[i].empty())
                 {
                     auto idx = LMS[i].front();
