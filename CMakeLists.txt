@@ -21,11 +21,12 @@ if(BUILD_TESTS)
     add_subdirectory(${PROJECT_SOURCE_DIR}/submodules/googletest)
     include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
     pkg_add_test(saca_k_test unit_test/saca_k_test.cpp)
-    # pkg_add_test(bwtisfm_test unit_test/bwt_isfm_test.cpp)
+    pkg_add_test(integration_test unit_test/integration_test.cpp)
 endif()
 
 # Regular source file
 add_executable(build_sa src/build_sa.cpp)
+add_executable(build_index src/build_index.cpp)
 
 # Message
 message("Build type: ${CMAKE_BUILD_TYPE}")
