@@ -1,15 +1,13 @@
 #include <gtest/gtest.h>
-#include "bwt_isfm.hpp"
+#include "fm_index.hpp"
+#include "saca_k.hpp"
 
 using ::testing::TestWithParam;
 using ::testing::Values;
 using SeqType = std::string;
 using IndexType = uint8_t;
-using BigSorter = SAIS<std::vector<uint32_t>, std::vector<uint32_t>::iterator>;
-using MedSorter = SAIS<std::vector<uint16_t>, std::vector<uint16_t>::iterator>;
-using SmallSorter = SAIS<std::vector<uint8_t>, std::vector<uint8_t>::iterator>;
 
-class BWTISFMTest : public TestWithParam<int>
+class IntegrationTest : public TestWithParam<int>
 {
   protected:
     void SetUp() override
@@ -117,7 +115,7 @@ class BWTISFMTest : public TestWithParam<int>
     int sample_step; 
 };
 
-TEST_P(BWTISFMTest, Constructor)
+TEST_P(IntegrationTest, Constructor)
 {
     auto map = 
     [](char base) 
@@ -134,8 +132,9 @@ TEST_P(BWTISFMTest, Constructor)
                 throw std::runtime_error("unknown character");
         }
     };
-    BWT_ISFM<SeqType, IndexType, 2, BigSorter, MedSorter
-        , SmallSorter> fm_index(seq, map, sample_step);
+
+    FmIndex<SeqType, IndexType, 2, SACA_K> fm_index(
+        seq, map, sample_step);
 
     for (auto i = 0; i < seq.size(); i++)
     {
@@ -148,5 +147,5 @@ TEST_P(BWTISFMTest, Constructor)
 }
 
 // Parameterized test: pass in sample_step
-INSTANTIATE_TEST_CASE_P(DifferentSampleRate, BWTISFMTest
+INSTANTIATE_TEST_CASE_P(DifferentSampleRate, IntegrationTest
     , Values(1, 2, 4, 8, 16, 32));
